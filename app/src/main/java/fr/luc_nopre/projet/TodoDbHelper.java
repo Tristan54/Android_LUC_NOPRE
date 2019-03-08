@@ -3,8 +3,11 @@ package fr.luc_nopre.projet;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.MatrixCursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -45,6 +48,7 @@ public class TodoDbHelper extends SQLiteOpenHelper {
 
         // Création de la projection souhaitée
         String[] projection = {
+                TodoContract.TodoEntry._ID,
                 TodoContract.TodoEntry.COLUMN_NAME_LABEL,
                 TodoContract.TodoEntry.COLUMN_NAME_TAG,
                 TodoContract.TodoEntry.COLUMN_NAME_DONE
@@ -65,10 +69,12 @@ public class TodoDbHelper extends SQLiteOpenHelper {
         ArrayList<TodoItem> items = new ArrayList<TodoItem>();
 
         while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndex(TodoContract.TodoEntry._ID));
             String label = cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_LABEL));
             TodoItem.Tags tag = TodoItem.getTagFor(cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_TAG)));
             boolean done = (cursor.getInt(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_DONE)) == 1);
             TodoItem item = new TodoItem(label, tag, done);
+            item.setId(id);
             items.add(item);
         }
 
@@ -96,5 +102,58 @@ public class TodoDbHelper extends SQLiteOpenHelper {
 
         // Ménage
         dbHelper.close();
+    }
+
+    static void updateDone(TodoItem item, Context context){
+        TodoDbHelper dbHelper = new TodoDbHelper(context);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(TodoContract.TodoEntry.COLUMN_NAME_DONE, item.isDone());
+        long newRowId = (long) db.update(TodoContract.TodoEntry.TABLE_NAME,values,"_id="+item.getId(), null);
+        dbHelper.close();
+    }
+
+    public ArrayList<Cursor> getData(String Query){
+        //get writable database
+        SQLiteDatabase sqlDB = this.getWritableDatabase();
+        String[] columns = new String[] { "message" };
+        //an array list of cursor to save two cursors one has results from the query
+        //other cursor stores error message if any errors are triggered
+        ArrayList<Cursor> alc = new ArrayList<Cursor>(2);
+        MatrixCursor Cursor2= new MatrixCursor(columns);
+        alc.add(null);
+        alc.add(null);
+
+        try{
+            String maxQuery = Query ;
+            //execute the query results will be save in Cursor c
+            Cursor c = sqlDB.rawQuery(maxQuery, null);
+
+            //add value to cursor2
+            Cursor2.addRow(new Object[] { "Success" });
+
+            alc.set(1,Cursor2);
+            if (null != c && c.getCount() > 0) {
+
+                alc.set(0,c);
+                c.moveToFirst();
+
+                return alc ;
+            }
+            return alc;
+        } catch(SQLException sqlEx){
+            Log.d("printing exception", sqlEx.getMessage());
+            //if any exceptions are triggered save the error message to cursor an return the arraylist
+            Cursor2.addRow(new Object[] { ""+sqlEx.getMessage() });
+            alc.set(1,Cursor2);
+            return alc;
+        } catch(Exception ex){
+            Log.d("printing exception", ex.getMessage());
+
+            //if any exceptions are triggered save the error message to cursor an return the arraylist
+            Cursor2.addRow(new Object[] { ""+ex.getMessage() });
+            alc.set(1,Cursor2);
+            return alc;
+        }
     }
 }

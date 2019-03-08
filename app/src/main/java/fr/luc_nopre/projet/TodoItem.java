@@ -21,6 +21,7 @@ public class TodoItem {
 
     private String label;
     private Tags tag;
+    private int id;
     private boolean done;
 
     public TodoItem(Tags tag, String label) {
@@ -67,4 +68,10 @@ public class TodoItem {
     public void setLabel(String label) {
         this.label = label;
     }
+
+    public void setId(int id){
+        this.id = id;
+    }
+
+    public int getId(){ return this.id;}
 }

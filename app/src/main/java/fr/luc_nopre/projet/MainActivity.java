@@ -1,5 +1,6 @@
 package fr.luc_nopre.projet;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -29,12 +30,13 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
+                Intent newAct = new Intent(getBaseContext(),creationListe.class);
+                startActivity(newAct);
             }
         });
         Log.i("INIT", "Fin initialisation composantes");
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 //        TodoDbHelper.addItem(item, getBaseContext());
 
         // On récupère les items
-        items = TodoDbHelper.getItems(getBaseContext());
+        items = TodoDbHelper.getItems(this);
         Log.i("INIT", "Fin initialisation items");
 
         // On initialise le RecyclerView
@@ -77,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent dbmanager = new Intent(getBaseContext(),AndroidDatabaseManager.class);
+            startActivity(dbmanager);
         }
 
         return super.onOptionsItemSelected(item);

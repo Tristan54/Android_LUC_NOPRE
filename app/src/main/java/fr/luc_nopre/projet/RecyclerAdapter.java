@@ -56,7 +56,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
             resources = itemView.getResources();
         }
 
-        public void bindTodo(TodoItem todo) {
+        public void bindTodo(final TodoItem todo) {
             label.setText(todo.getLabel());
             sw.setChecked(todo.isDone());
             switch(todo.getTag()) {
@@ -71,6 +71,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
                     break;
 
             }
+            sw.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    todo.setDone(todo.isDone());
+                    TodoDbHelper.updateDone(todo,v.getContext());
+                }
+            });
         }
 
     }
