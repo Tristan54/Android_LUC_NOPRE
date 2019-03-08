@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -48,6 +49,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
         private TextView label;
         private TodoItem item;
 
+        private LinearLayout l;
+
         public TodoHolder(View itemView) {
             super(itemView);
 
@@ -55,12 +58,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
             sw = (Switch) itemView.findViewById(R.id.switch1);
             label = (TextView) itemView.findViewById(R.id.textView);
             resources = itemView.getResources();
+
+            l = itemView.findViewById(R.id.linearLayout);
         }
 
         public void bindTodo(final TodoItem todo) {
             label.setText(todo.getLabel());
             sw.setChecked(todo.isDone());
-            switch(todo.getTag()) {
+            if (todo.isDone()) {
+
+            }
+            switch (todo.getTag()) {
                 case Faible:
                     image.setBackgroundColor(resources.getColor(R.color.faible));
                     break;
@@ -75,15 +83,18 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
             sw.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(todo.isDone()){
+                    if (todo.isDone()) {
                         todo.setDone(false);
-                    }else{
+                        l.setBackgroundColor(resources.getColor(R.color.white));
+                    } else {
                         todo.setDone(true);
+                        l.setBackgroundColor(resources.getColor(R.color.gray));
                     }
 
-                    TodoDbHelper.updateDone(todo,v.getContext());
+                    TodoDbHelper.updateDone(todo, v.getContext());
                 }
             });
+
         }
 
     }
