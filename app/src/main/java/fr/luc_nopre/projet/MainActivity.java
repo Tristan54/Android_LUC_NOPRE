@@ -83,6 +83,13 @@ public class MainActivity extends AppCompatActivity {
             startActivity(dbmanager);
         }
 
+        if (id == R.id.action_clear) {
+            TodoDbHelper.clearBDD(this.getBaseContext());
+            items.clear();
+            recycler.getAdapter().notifyDataSetChanged();
+
+        }
+
         return super.onOptionsItemSelected(item);
     }
 

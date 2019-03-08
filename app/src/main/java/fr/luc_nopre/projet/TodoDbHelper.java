@@ -113,6 +113,14 @@ public class TodoDbHelper extends SQLiteOpenHelper {
         dbHelper.close();
     }
 
+    static void clearBDD(Context context){
+        TodoDbHelper dbHelper = new TodoDbHelper(context);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ContentValues values = new ContentValues();
+        long newRowId = (long) db.delete(TodoContract.TodoEntry.TABLE_NAME,null, null);
+        dbHelper.close();
+    }
+
     public ArrayList<Cursor> getData(String Query){
         //get writable database
         SQLiteDatabase sqlDB = this.getWritableDatabase();
