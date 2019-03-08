@@ -2,6 +2,7 @@ package fr.luc_nopre.projet;
 
 import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,7 +75,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
             sw.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    todo.setDone(todo.isDone());
+                    if(todo.isDone()){
+                        todo.setDone(false);
+                    }else{
+                        todo.setDone(true);
+                    }
+
                     TodoDbHelper.updateDone(todo,v.getContext());
                 }
             });
