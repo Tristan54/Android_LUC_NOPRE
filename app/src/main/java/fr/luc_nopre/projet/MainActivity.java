@@ -3,7 +3,6 @@ package fr.luc_nopre.projet;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Intent newAct = new Intent(getBaseContext(),creationListe.class);
+                Intent newAct = new Intent(getBaseContext(), CreationListe.class);
                 startActivity(newAct);
             }
         });
@@ -84,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (id == R.id.action_clear) {
+            CreationListe.clearBDD();
             TodoDbHelper.clearBDD(this.getBaseContext());
             items.clear();
             recycler.getAdapter().notifyDataSetChanged();

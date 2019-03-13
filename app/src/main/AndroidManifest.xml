@@ -9,7 +9,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".creationListe"
+            android:name=".CreationListe"
             android:label="@string/title_activity_creation_liste"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity

@@ -11,9 +11,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-/**
- * Created by phil on 11/02/17.
- */
 
 public class TodoDbHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
@@ -24,7 +21,8 @@ public class TodoDbHelper extends SQLiteOpenHelper {
                     TodoContract.TodoEntry._ID + " INTEGER PRIMARY KEY," +
                     TodoContract.TodoEntry.COLUMN_NAME_LABEL + " TEXT," +
                     TodoContract.TodoEntry.COLUMN_NAME_TAG + " TEXT,"  +
-                    TodoContract.TodoEntry.COLUMN_NAME_DONE +  " INTEGER)";
+                    TodoContract.TodoEntry.COLUMN_NAME_DONE +  " INTEGER,"+
+                    TodoContract.TodoEntry.COLUMN_NAME_POSITION + " INTEGER)";
 
     public TodoDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -51,7 +49,8 @@ public class TodoDbHelper extends SQLiteOpenHelper {
                 TodoContract.TodoEntry._ID,
                 TodoContract.TodoEntry.COLUMN_NAME_LABEL,
                 TodoContract.TodoEntry.COLUMN_NAME_TAG,
-                TodoContract.TodoEntry.COLUMN_NAME_DONE
+                TodoContract.TodoEntry.COLUMN_NAME_DONE,
+                TodoContract.TodoEntry.COLUMN_NAME_POSITION
         };
 
         // Requête
@@ -73,7 +72,8 @@ public class TodoDbHelper extends SQLiteOpenHelper {
             String label = cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_LABEL));
             TodoItem.Tags tag = TodoItem.getTagFor(cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_TAG)));
             boolean done = (cursor.getInt(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_DONE)) == 1);
-            TodoItem item = new TodoItem(label, tag, done);
+            int position = cursor.getInt(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_POSITION));
+            TodoItem item = new TodoItem(label, tag, done, position);
             item.setId(id);
             items.add(item);
         }
@@ -96,6 +96,7 @@ public class TodoDbHelper extends SQLiteOpenHelper {
         values.put(TodoContract.TodoEntry.COLUMN_NAME_LABEL, item.getLabel());
         values.put(TodoContract.TodoEntry.COLUMN_NAME_TAG, item.getTag().getDesc());
         values.put(TodoContract.TodoEntry.COLUMN_NAME_DONE, item.isDone());
+        values.put(TodoContract.TodoEntry.COLUMN_NAME_POSITION, item.getPosition());
 
         // Enregistrement
         long newRowId = db.insert(TodoContract.TodoEntry.TABLE_NAME, null, values);
@@ -108,6 +109,7 @@ public class TodoDbHelper extends SQLiteOpenHelper {
         TodoDbHelper dbHelper = new TodoDbHelper(context);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         ContentValues values = new ContentValues();
+
         values.put(TodoContract.TodoEntry.COLUMN_NAME_DONE, item.isDone());
         long newRowId = (long) db.update(TodoContract.TodoEntry.TABLE_NAME,values,"_id="+item.getId(), null);
         dbHelper.close();

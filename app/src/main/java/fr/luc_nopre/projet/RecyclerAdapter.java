@@ -65,9 +65,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
         public void bindTodo(final TodoItem todo) {
             label.setText(todo.getLabel());
             sw.setChecked(todo.isDone());
-            if (todo.isDone()) {
 
+            if(todo.isDone()){
+                l.setBackgroundColor(resources.getColor(R.color.gray));
+            }else{
+                l.setBackgroundColor(resources.getColor(R.color.white));
             }
+
+
             switch (todo.getTag()) {
                 case Faible:
                     image.setBackgroundColor(resources.getColor(R.color.faible));

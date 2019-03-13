@@ -10,7 +10,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 
-public class creationListe extends AppCompatActivity {
+public class CreationListe extends AppCompatActivity {
+
+    private static int compt = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +62,17 @@ public class creationListe extends AppCompatActivity {
                 if(t == null){
                     t = TodoItem.Tags.Faible;
                 }
-                TodoItem item = new TodoItem(t,label);
+                TodoItem item = new TodoItem(t,label,compt);
+                compt++;
                 TodoDbHelper.addItem(item,getBaseContext());
                 Intent newAct = new Intent(getBaseContext(),MainActivity.class);
                 startActivity(newAct);
             }
         });
+    }
+
+    public static void clearBDD(){
+        compt = 0;
     }
 
 }
