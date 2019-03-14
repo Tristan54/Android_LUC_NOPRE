@@ -18,7 +18,7 @@ import java.util.Collections;
  * Created by phil on 07/02/17.
  */
 
-public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHolder> {
+public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHolder> implements ItemTouchHelperAdapter{
 
     private ArrayList<TodoItem> items;
 
@@ -39,12 +39,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
     }
 
 
-    public void onItemDismiss(int position) {
-        items.remove(position);
-        notifyItemRemoved(position);
-    }
-
-
+    @Override
     public boolean onItemMove(int fromPosition, int toPosition) {
         if (fromPosition < toPosition) {
             for (int i = fromPosition; i < toPosition; i++) {
@@ -70,7 +65,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
         private ImageView image;
         private Switch sw;
         private TextView label;
-        private TodoItem item;
 
         private LinearLayout l;
 
