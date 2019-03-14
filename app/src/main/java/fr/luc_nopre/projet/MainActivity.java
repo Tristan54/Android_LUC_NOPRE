@@ -1,5 +1,7 @@
 package fr.luc_nopre.projet;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -9,9 +11,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import java.util.ArrayList;
 
@@ -124,6 +126,34 @@ public class MainActivity extends AppCompatActivity {
                 recycler.getAdapter().notifyItemChanged(position);
             }
         };
+
+
+        recycler.addOnItemTouchListener(new RecyclerTouchListener(MainActivity.this, recycler, new RecyclerTouchListener.ClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+
+            @Override
+            public void onLongClick(View view) {
+
+                AlertDialog.Builder dialogue = new AlertDialog.Builder(MainActivity.this);
+                dialogue.setTitle("Delete entry");
+                dialogue.setMessage("Are you sure you want to delete this entry?");
+
+                dialogue.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Continue with delete operation
+                    }
+                });
+
+                dialogue.setNegativeButton(android.R.string.no, null);
+                dialogue.setIcon(android.R.drawable.ic_dialog_alert);
+                dialogue.show();
+
+            }
+        }));
+
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(itemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recycler);
