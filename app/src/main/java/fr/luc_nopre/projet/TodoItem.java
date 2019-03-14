@@ -23,6 +23,8 @@ public class TodoItem {
     private Tags tag;
     private int id;
     private boolean done;
+    private int position;
+
 
     public TodoItem(Tags tag, String label) {
         this.tag = tag;
@@ -30,10 +32,24 @@ public class TodoItem {
         this.done = false;
     }
 
+    public TodoItem(Tags tag, String label, int position) {
+        this.tag = tag;
+        this.label = label;
+        this.done = false;
+        this.position = position;
+    }
+
     public TodoItem(String label, Tags tag, boolean done) {
         this.label = label;
         this.tag = tag;
         this.done = done;
+    }
+
+    public TodoItem(String label, Tags tag, boolean done, int position) {
+        this.label = label;
+        this.tag = tag;
+        this.done = done;
+        this.position = position;
     }
 
     public static Tags getTagFor(String desc) {
@@ -74,4 +90,13 @@ public class TodoItem {
     }
 
     public int getId(){ return this.id;}
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
 }

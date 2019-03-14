@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Intent newAct = new Intent(getBaseContext(),creationListe.class);
+                Intent newAct = new Intent(getBaseContext(), CreationListe.class);
                 startActivity(newAct);
             }
         });
@@ -88,6 +88,13 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             Intent dbmanager = new Intent(getBaseContext(),AndroidDatabaseManager.class);
             startActivity(dbmanager);
+        }
+
+        if (id == R.id.action_clear) {
+            TodoDbHelper.clearBDD(this.getBaseContext());
+            items.clear();
+            recycler.getAdapter().notifyDataSetChanged();
+
         }
 
         return super.onOptionsItemSelected(item);
