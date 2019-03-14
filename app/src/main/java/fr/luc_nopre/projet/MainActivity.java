@@ -1,9 +1,10 @@
 package fr.luc_nopre.projet;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 
 import java.util.ArrayList;
 
@@ -61,6 +63,11 @@ public class MainActivity extends AppCompatActivity {
 
         setRecyclerViewItemTouchListener();
         Log.i("INIT", "Fin initialisation recycler");
+
+
+
+
+
     }
 
     @Override
@@ -86,6 +93,12 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+
+
+
+
+
     private void setRecyclerViewItemTouchListener() {
         ItemTouchHelper.SimpleCallback itemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
@@ -107,9 +120,37 @@ public class MainActivity extends AppCompatActivity {
                         item.setDone(false);
                         break;
                 }
+                TodoDbHelper.updateDone(item, viewHolder.itemView.getContext());
                 recycler.getAdapter().notifyItemChanged(position);
             }
+
+
+
+
         };
+
+        recycler.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                AlertDialog.Builder dialogue = new AlertDialog.Builder(getApplicationContext());
+                dialogue.setTitle("Delete entry");
+                dialogue.setMessage("Are you sure you want to delete this entry?");
+
+                dialogue.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Continue with delete operation
+                    }
+                });
+
+                dialogue.setNegativeButton(android.R.string.no, null);
+                dialogue.setIcon(android.R.drawable.ic_dialog_alert);
+                dialogue.show();
+
+                return true;
+            }
+        });
+
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(itemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recycler);
