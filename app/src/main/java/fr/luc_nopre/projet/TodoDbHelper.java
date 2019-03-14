@@ -73,8 +73,9 @@ public class TodoDbHelper extends SQLiteOpenHelper {
             TodoItem.Tags tag = TodoItem.getTagFor(cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_TAG)));
             boolean done = (cursor.getInt(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_DONE)) == 1);
             int position = cursor.getInt(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_POSITION));
-            TodoItem item = new TodoItem(label, tag, done, position);
+            TodoItem item = new TodoItem(label, tag, done, id);
             item.setId(id);
+            updatePosition(item,context);
             items.add(item);
         }
 
@@ -111,6 +112,16 @@ public class TodoDbHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         values.put(TodoContract.TodoEntry.COLUMN_NAME_DONE, item.isDone());
+        long newRowId = (long) db.update(TodoContract.TodoEntry.TABLE_NAME,values,"_id="+item.getId(), null);
+        dbHelper.close();
+    }
+
+    static void updatePosition(TodoItem item, Context context){
+        TodoDbHelper dbHelper = new TodoDbHelper(context);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(TodoContract.TodoEntry.COLUMN_NAME_POSITION, item.getId());
         long newRowId = (long) db.update(TodoContract.TodoEntry.TABLE_NAME,values,"_id="+item.getId(), null);
         dbHelper.close();
     }

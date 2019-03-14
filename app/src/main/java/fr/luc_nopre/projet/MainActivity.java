@@ -83,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (id == R.id.action_clear) {
-            CreationListe.clearBDD();
             TodoDbHelper.clearBDD(this.getBaseContext());
             items.clear();
             recycler.getAdapter().notifyDataSetChanged();

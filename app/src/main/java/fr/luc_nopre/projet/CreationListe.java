@@ -12,8 +12,6 @@ import android.widget.RadioGroup;
 
 public class CreationListe extends AppCompatActivity {
 
-    private static int compt = 1;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,17 +60,12 @@ public class CreationListe extends AppCompatActivity {
                 if(t == null){
                     t = TodoItem.Tags.Faible;
                 }
-                TodoItem item = new TodoItem(t,label,compt);
-                compt++;
+                TodoItem item = new TodoItem(t,label);
                 TodoDbHelper.addItem(item,getBaseContext());
                 Intent newAct = new Intent(getBaseContext(),MainActivity.class);
                 startActivity(newAct);
             }
         });
-    }
-
-    public static void clearBDD(){
-        compt = 0;
     }
 
 }
