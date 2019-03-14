@@ -92,12 +92,16 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+
     private void setRecyclerViewItemTouchListener() {
         ItemTouchHelper.SimpleCallback itemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder viewHolder1) {
-                // Non géré dans cet exemple (ce sont les drags) -> on retourne false
-                return false;
+                adapter.onItemMove(viewHolder.getAdapterPosition(),viewHolder1.getAdapterPosition());
+                return true;
             }
 
             @Override
@@ -115,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 recycler.getAdapter().notifyItemChanged(position);
             }
+
+
         };
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(itemTouchCallback);

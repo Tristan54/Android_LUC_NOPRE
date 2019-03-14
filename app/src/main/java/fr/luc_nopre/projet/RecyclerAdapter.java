@@ -12,6 +12,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by phil on 07/02/17.
@@ -36,6 +37,28 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
         TodoItem it = items.get(position);
         holder.bindTodo(it);
     }
+
+
+    public void onItemDismiss(int position) {
+        items.remove(position);
+        notifyItemRemoved(position);
+    }
+
+
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(items, i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(items, i, i - 1);
+            }
+        }
+        notifyItemMoved(fromPosition, toPosition);
+        return true;
+    }
+
 
     @Override
     public int getItemCount() {
