@@ -1,17 +1,23 @@
 package fr.luc_nopre.projet;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 
 /**
@@ -32,6 +38,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
         return new TodoHolder(inflatedView);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBindViewHolder(TodoHolder holder, int position) {
         TodoItem it = items.get(position);
@@ -65,6 +72,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
         private ImageView image;
         private Switch sw;
         private TextView label;
+        private TextView date;
 
         private LinearLayout l;
 
@@ -75,11 +83,21 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
             sw = (Switch) itemView.findViewById(R.id.switch1);
             label = (TextView) itemView.findViewById(R.id.textView);
             resources = itemView.getResources();
+            date = itemView.findViewById(R.id.dateView);
 
             l = itemView.findViewById(R.id.linearLayout);
         }
 
+
+
+        @RequiresApi(api = Build.VERSION_CODES.O)
         public void bindTodo(final TodoItem todo) {
+            LocalDate d = todo.getDate();
+            int day = d.getDayOfMonth();
+            int month = d.getMonthValue();
+            int years = d.getYear();
+
+            date.setText("date d'échéance : "+day+"/"+month+"/"+years);
             label.setText(todo.getLabel());
             sw.setChecked(todo.isDone());
 
@@ -116,6 +134,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
                     TodoDbHelper.updateDone(todo, v.getContext());
                 }
             });
+
+            LocalDate dateActuel = LocalDate.now();
+            if(day == dateActuel.getDayOfMonth() && month == dateActuel.getMonthValue() && years == dateActuel.getYear()){
+                TodoDbHelper.deleteItem(todo,itemView.getContext());
+            }
 
         }
 

@@ -3,7 +3,9 @@ package fr.luc_nopre.projet;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,6 +18,8 @@ import android.view.MenuItem;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayoutManager manager;
     private RecyclerAdapter adapter;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +56,15 @@ public class MainActivity extends AppCompatActivity {
         // On récupère les items
         items = TodoDbHelper.getItems(this);
         Log.i("INIT", "Fin initialisation items");
+
+        // On trie la liste pour avoir dans l'ordre en fonction de leur position
+
+        Collections.sort(items, new Comparator<TodoItem>() {
+            @Override
+            public int compare(TodoItem ti1, TodoItem ti2) {
+                return ti1.compareTo(ti2);
+            }
+        });
 
         // On initialise le RecyclerView
         recycler = (RecyclerView) findViewById(R.id.recycler);
@@ -101,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
                 adapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                changerPosition(viewHolder.getAdapterPosition(),target.getAdapterPosition());
                 return true;
             }
 
@@ -130,26 +145,24 @@ public class MainActivity extends AppCompatActivity {
 
         recycler.addOnItemTouchListener(new RecyclerTouchListener(MainActivity.this, recycler, new RecyclerTouchListener.ClickListener() {
             @Override
-            public void onClick(View view) {
-
-            }
-
-            @Override
-            public void onLongClick(View view) {
-
+            public void onClick(final View view) {
                 AlertDialog.Builder dialogue = new AlertDialog.Builder(MainActivity.this);
                 dialogue.setTitle("Delete entry");
                 dialogue.setMessage("Are you sure you want to delete this entry?");
 
                 dialogue.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        // Continue with delete operation
                     }
                 });
 
                 dialogue.setNegativeButton(android.R.string.no, null);
                 dialogue.setIcon(android.R.drawable.ic_dialog_alert);
                 dialogue.show();
+            }
+
+            @Override
+            public void onLongClick(View view) {
+
 
             }
         }));
@@ -157,5 +170,20 @@ public class MainActivity extends AppCompatActivity {
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(itemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recycler);
+    }
+
+    private void changerPosition(int n1, int n2){
+        // avant changement
+        TodoItem item1 = this.items.get(n1);
+        TodoItem item2 = this.items.get(n2);
+
+        Log.i("Move", "changement de position entre : "+n1+" et : "+n2);
+
+        int tmp = item1.getPosition();
+        item1.setPosition(item2.getPosition());
+        TodoDbHelper.updatePosition(item1,this.getBaseContext());
+
+        item2.setPosition(tmp);
+        TodoDbHelper.updatePosition(item2,this.getBaseContext());
     }
 }

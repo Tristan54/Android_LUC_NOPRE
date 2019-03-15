@@ -10,5 +10,6 @@ public final class TodoContract {
         public static final String COLUMN_NAME_TAG = "tag";
         public static final String COLUMN_NAME_DONE = "done";
         public static final String COLUMN_NAME_POSITION = "position";
+        public static final String COLUMN_NAME_DATE = "dateEcheance";
     }
 }

@@ -1,14 +1,21 @@
 package fr.luc_nopre.projet;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+
+import java.time.*;
+
 
 public class CreationListe extends AppCompatActivity {
 
@@ -32,10 +39,14 @@ public class CreationListe extends AppCompatActivity {
 
         Button valider = findViewById(R.id.valider);
         valider.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             public void onClick(View v) {
 
                 EditText text = (EditText)findViewById(R.id.textListe);
                 String label = String.valueOf(text.getText());
+                if(label.equals("")){
+                    label = "item";
+                }
 
                 RadioGroup radio = findViewById(R.id.radio);
                 int id = radio.getCheckedRadioButtonId();
@@ -58,9 +69,17 @@ public class CreationListe extends AppCompatActivity {
                 }
 
                 if(t == null){
-                    t = TodoItem.Tags.Faible;
+                    t = TodoItem.Tags.Normal;
                 }
-                TodoItem item = new TodoItem(t,label);
+
+                DatePicker date = findViewById(R.id.date);
+                int day = date.getDayOfMonth();
+                int month = date.getMonth()+1;
+                int years = date.getYear();
+
+                LocalDate dateEcheance = LocalDate.of(years, month, day);
+
+                TodoItem item = new TodoItem(t,label,dateEcheance);
                 TodoDbHelper.addItem(item,getBaseContext());
                 Intent newAct = new Intent(getBaseContext(),MainActivity.class);
                 startActivity(newAct);

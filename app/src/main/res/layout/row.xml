@@ -9,8 +9,7 @@
     android:background="@color/white"
     android:id="@+id/linearLayout">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <LinearLayout
         android:orientation="horizontal" android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -32,6 +31,27 @@
             android:layout_height="wrap_content"
             android:id="@+id/switch1"
             android:layout_marginRight="15dp"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:orientation="horizontal" android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:text="dateView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:layout_marginRight="15dp"
+            android:id="@+id/dateView" />
+
     </LinearLayout>
 
     <TextView

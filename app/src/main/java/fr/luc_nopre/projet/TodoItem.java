@@ -1,5 +1,12 @@
 package fr.luc_nopre.projet;
 
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.Objects;
+
 /**
  * Created by phil on 06/02/17.
  */
@@ -24,12 +31,14 @@ public class TodoItem {
     private int id;
     private boolean done;
     private int position;
+    private LocalDate date;
 
 
-    public TodoItem(Tags tag, String label) {
+    public TodoItem(Tags tag, String label, LocalDate date) {
         this.tag = tag;
         this.label = label;
         this.done = false;
+        this.date = date;
     }
 
     public TodoItem(Tags tag, String label, int position) {
@@ -45,11 +54,12 @@ public class TodoItem {
         this.done = done;
     }
 
-    public TodoItem(String label, Tags tag, boolean done, int position) {
+    public TodoItem(String label, Tags tag, boolean done, int position, LocalDate date) {
         this.label = label;
         this.tag = tag;
         this.done = done;
         this.position = position;
+        this.date = date;
     }
 
     public static Tags getTagFor(String desc) {
@@ -97,6 +107,34 @@ public class TodoItem {
 
     public void setPosition(int position) {
         this.position = position;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public int compareTo(TodoItem td){
+        int res;
+        if(this.getPosition() > td.getPosition()){
+            res = 1;
+        }else if(this.getPosition() < td.getPosition()){
+            res = -1;
+        }else{
+            res = 0;
+        }
+        return res;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TodoItem)) return false;
+        TodoItem item = (TodoItem) o;
+        return getPosition() == item.getPosition();
     }
 
 }

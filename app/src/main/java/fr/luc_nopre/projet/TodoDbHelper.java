@@ -2,14 +2,23 @@ package fr.luc_nopre.projet;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.icu.text.UnicodeSetSpanner;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 
 
 public class TodoDbHelper extends SQLiteOpenHelper {
@@ -22,7 +31,8 @@ public class TodoDbHelper extends SQLiteOpenHelper {
                     TodoContract.TodoEntry.COLUMN_NAME_LABEL + " TEXT," +
                     TodoContract.TodoEntry.COLUMN_NAME_TAG + " TEXT,"  +
                     TodoContract.TodoEntry.COLUMN_NAME_DONE +  " INTEGER,"+
-                    TodoContract.TodoEntry.COLUMN_NAME_POSITION + " INTEGER)";
+                    TodoContract.TodoEntry.COLUMN_NAME_POSITION + " INTEGER," +
+                    TodoContract.TodoEntry.COLUMN_NAME_DATE + " TEXT)";
 
     public TodoDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -38,6 +48,7 @@ public class TodoDbHelper extends SQLiteOpenHelper {
         // Rien pour le moment
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     static ArrayList<TodoItem> getItems(Context context) {
         TodoDbHelper dbHelper = new TodoDbHelper(context);
 
@@ -50,7 +61,8 @@ public class TodoDbHelper extends SQLiteOpenHelper {
                 TodoContract.TodoEntry.COLUMN_NAME_LABEL,
                 TodoContract.TodoEntry.COLUMN_NAME_TAG,
                 TodoContract.TodoEntry.COLUMN_NAME_DONE,
-                TodoContract.TodoEntry.COLUMN_NAME_POSITION
+                TodoContract.TodoEntry.COLUMN_NAME_POSITION,
+                TodoContract.TodoEntry.COLUMN_NAME_DATE
         };
 
         // Requête
@@ -73,7 +85,20 @@ public class TodoDbHelper extends SQLiteOpenHelper {
             TodoItem.Tags tag = TodoItem.getTagFor(cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_TAG)));
             boolean done = (cursor.getInt(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_DONE)) == 1);
             int position = cursor.getInt(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_POSITION));
-            TodoItem item = new TodoItem(label, tag, done, id);
+            String date = cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_DATE));
+
+            // Pour recuperer l'annee, le mois et le jour de la date
+            final String SEPARATEUR = "-";
+            String dateSep[] = date.split(SEPARATEUR);
+
+            LocalDate dateEcheance = LocalDate.of(Integer.parseInt(dateSep[0]), Integer.parseInt(dateSep[1]), Integer.parseInt(dateSep[2]));
+
+            TodoItem item;
+            if(position == 0){
+                item = new TodoItem(label, tag, done, id, dateEcheance);
+            }else{
+                item = new TodoItem(label, tag, done, position, dateEcheance);
+            }
             item.setId(id);
             updatePosition(item,context);
             items.add(item);
@@ -86,6 +111,8 @@ public class TodoDbHelper extends SQLiteOpenHelper {
         return items;
     }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
     static void addItem(TodoItem item, Context context) {
         TodoDbHelper dbHelper = new TodoDbHelper(context);
 
@@ -98,6 +125,7 @@ public class TodoDbHelper extends SQLiteOpenHelper {
         values.put(TodoContract.TodoEntry.COLUMN_NAME_TAG, item.getTag().getDesc());
         values.put(TodoContract.TodoEntry.COLUMN_NAME_DONE, item.isDone());
         values.put(TodoContract.TodoEntry.COLUMN_NAME_POSITION, item.getPosition());
+        values.put(TodoContract.TodoEntry.COLUMN_NAME_DATE, item.getDate().getYear()+"-"+item.getDate().getMonthValue()+"-"+item.getDate().getDayOfMonth());
 
         // Enregistrement
         long newRowId = db.insert(TodoContract.TodoEntry.TABLE_NAME, null, values);
@@ -121,7 +149,7 @@ public class TodoDbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         ContentValues values = new ContentValues();
 
-        values.put(TodoContract.TodoEntry.COLUMN_NAME_POSITION, item.getId());
+        values.put(TodoContract.TodoEntry.COLUMN_NAME_POSITION, item.getPosition());
         long newRowId = (long) db.update(TodoContract.TodoEntry.TABLE_NAME,values,"_id="+item.getId(), null);
         dbHelper.close();
     }
@@ -131,6 +159,14 @@ public class TodoDbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         ContentValues values = new ContentValues();
         long newRowId = (long) db.delete(TodoContract.TodoEntry.TABLE_NAME,null, null);
+        dbHelper.close();
+    }
+
+    static void deleteItem(TodoItem item, Context context){
+        TodoDbHelper dbHelper = new TodoDbHelper(context);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        ContentValues values = new ContentValues();
+        long newRowId = (long) db.delete(TodoContract.TodoEntry.TABLE_NAME,"_id="+item.getId(), null);
         dbHelper.close();
     }
 
