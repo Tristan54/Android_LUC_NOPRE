@@ -13,12 +13,8 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 
 
 public class TodoDbHelper extends SQLiteOpenHelper {
@@ -85,13 +81,23 @@ public class TodoDbHelper extends SQLiteOpenHelper {
             TodoItem.Tags tag = TodoItem.getTagFor(cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_TAG)));
             boolean done = (cursor.getInt(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_DONE)) == 1);
             int position = cursor.getInt(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_POSITION));
-            String date = cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_DATE));
+            String d = cursor.getString(cursor.getColumnIndex(TodoContract.TodoEntry.COLUMN_NAME_DATE));
 
             // Pour recuperer l'annee, le mois et le jour de la date
-            final String SEPARATEUR = "-";
-            String dateSep[] = date.split(SEPARATEUR);
+            final String SEPARATEUR = "T";
+            String dateSep[] = d.split(SEPARATEUR);
+            String date = dateSep[0];
+            String heure = dateSep[1];
+            Log.i("date split :", ""+date);
+            Log.i("heure split :", ""+heure);
+            final String SEPARATEURD = "-";
+            String date2Sep[] = date.split(SEPARATEURD);
 
-            LocalDate dateEcheance = LocalDate.of(Integer.parseInt(dateSep[0]), Integer.parseInt(dateSep[1]), Integer.parseInt(dateSep[2]));
+
+            final String SEPARATEURH = ":";
+            String heureSep[] = heure.split(SEPARATEURH);
+
+            LocalDateTime dateEcheance = LocalDateTime.of(Integer.parseInt(date2Sep[0]), Integer.parseInt(date2Sep[1]), Integer.parseInt(date2Sep[2]), Integer.parseInt(heureSep[0]), Integer.parseInt(heureSep[1]));
 
             TodoItem item;
             if(position == 0){
@@ -125,7 +131,7 @@ public class TodoDbHelper extends SQLiteOpenHelper {
         values.put(TodoContract.TodoEntry.COLUMN_NAME_TAG, item.getTag().getDesc());
         values.put(TodoContract.TodoEntry.COLUMN_NAME_DONE, item.isDone());
         values.put(TodoContract.TodoEntry.COLUMN_NAME_POSITION, item.getPosition());
-        values.put(TodoContract.TodoEntry.COLUMN_NAME_DATE, item.getDate().getYear()+"-"+item.getDate().getMonthValue()+"-"+item.getDate().getDayOfMonth());
+        values.put(TodoContract.TodoEntry.COLUMN_NAME_DATE, item.getDate().toString());
 
         // Enregistrement
         long newRowId = db.insert(TodoContract.TodoEntry.TABLE_NAME, null, values);

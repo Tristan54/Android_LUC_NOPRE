@@ -10,7 +10,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 
@@ -19,6 +18,7 @@ import java.time.*;
 
 public class CreationListe extends AppCompatActivity {
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +36,13 @@ public class CreationListe extends AppCompatActivity {
             }
         });
 
+        // On initilaise les editText à la date et l'heure actuelle
+        EditText dateD = findViewById(R.id.date);
+        EditText heureD = findViewById(R.id.heure);
+
+        LocalDateTime dateCour = LocalDateTime.now();
+        dateD.setText(dateCour.getDayOfMonth()+"/"+dateCour.getMonthValue()+"/"+dateCour.getYear());
+        heureD.setText(dateCour.getHour()+":"+dateCour.getMinute());
 
         Button valider = findViewById(R.id.valider);
         valider.setOnClickListener(new View.OnClickListener() {
@@ -72,12 +79,22 @@ public class CreationListe extends AppCompatActivity {
                     t = TodoItem.Tags.Normal;
                 }
 
-                DatePicker date = findViewById(R.id.date);
-                int day = date.getDayOfMonth();
-                int month = date.getMonth()+1;
-                int years = date.getYear();
+                EditText date = findViewById(R.id.date);
+                EditText heure = findViewById(R.id.heure);
 
-                LocalDate dateEcheance = LocalDate.of(years, month, day);
+                final String SEPARATEUR = "/";
+                String dateSep[] = date.getText().toString().split(SEPARATEUR);
+                int day = Integer.parseInt(dateSep[0]);
+                int month = Integer.parseInt(dateSep[1]);
+                int years = Integer.parseInt(dateSep[2]);
+
+
+                final String SEPARATEURH = ":";
+                String heureSep[] = heure.getText().toString().split(SEPARATEURH);
+                int hours = Integer.parseInt(heureSep[0]);
+                int minutes = Integer.parseInt(heureSep[1]);
+
+                LocalDateTime dateEcheance = LocalDateTime.of(years,month,day,hours,minutes);
 
                 TodoItem item = new TodoItem(t,label,dateEcheance);
                 TodoDbHelper.addItem(item,getBaseContext());

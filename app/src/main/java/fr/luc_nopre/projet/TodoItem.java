@@ -1,15 +1,6 @@
 package fr.luc_nopre.projet;
 
-import android.os.Build;
-import android.support.annotation.RequiresApi;
-
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.Objects;
-
-/**
- * Created by phil on 06/02/17.
- */
+import java.time.LocalDateTime;
 
 public class TodoItem {
 
@@ -31,30 +22,18 @@ public class TodoItem {
     private int id;
     private boolean done;
     private int position;
-    private LocalDate date;
+    private LocalDateTime date;
 
 
-    public TodoItem(Tags tag, String label, LocalDate date) {
+    public TodoItem(Tags tag, String label, LocalDateTime date) {
         this.tag = tag;
         this.label = label;
         this.done = false;
         this.date = date;
     }
 
-    public TodoItem(Tags tag, String label, int position) {
-        this.tag = tag;
-        this.label = label;
-        this.done = false;
-        this.position = position;
-    }
 
-    public TodoItem(String label, Tags tag, boolean done) {
-        this.label = label;
-        this.tag = tag;
-        this.done = done;
-    }
-
-    public TodoItem(String label, Tags tag, boolean done, int position, LocalDate date) {
+    public TodoItem(String label, Tags tag, boolean done, int position, LocalDateTime date) {
         this.label = label;
         this.tag = tag;
         this.done = done;
@@ -109,11 +88,11 @@ public class TodoItem {
         this.position = position;
     }
 
-    public LocalDate getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 

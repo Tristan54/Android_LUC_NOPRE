@@ -9,20 +9,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-
-/**
- * Created by phil on 07/02/17.
- */
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHolder> implements ItemTouchHelperAdapter{
 
@@ -92,12 +86,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
 
         @RequiresApi(api = Build.VERSION_CODES.O)
         public void bindTodo(final TodoItem todo) {
-            LocalDate d = todo.getDate();
+            LocalDateTime d = todo.getDate();
             int day = d.getDayOfMonth();
             int month = d.getMonthValue();
             int years = d.getYear();
 
-            date.setText("date d'échéance : "+day+"/"+month+"/"+years);
+            int hour = d.getHour();
+            int minute = d.getMinute();
+
+            date.setText("date d'échéance : "+day+"/"+month+"/"+years+" "+hour+":"+minute);
             label.setText(todo.getLabel());
             sw.setChecked(todo.isDone());
 
@@ -135,7 +132,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
                 }
             });
 
-            LocalDate dateActuel = LocalDate.now();
+            LocalDateTime dateActuel = LocalDateTime.now();
             if(day == dateActuel.getDayOfMonth() && month == dateActuel.getMonthValue() && years == dateActuel.getYear()){
                 TodoDbHelper.deleteItem(todo,itemView.getContext());
             }
