@@ -132,8 +132,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
                 }
             });
 
+
             LocalDateTime dateActuel = LocalDateTime.now();
-            if(day == dateActuel.getDayOfMonth() && month == dateActuel.getMonthValue() && years == dateActuel.getYear()){
+            if(d.isEqual(dateActuel) || d.isBefore(dateActuel)){
                 TodoDbHelper.deleteItem(todo,itemView.getContext());
             }
 
