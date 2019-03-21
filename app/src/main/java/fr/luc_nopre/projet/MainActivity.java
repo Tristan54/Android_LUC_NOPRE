@@ -181,18 +181,7 @@ public class MainActivity extends AppCompatActivity {
         recycler.addOnItemTouchListener(new RecyclerTouchListener(MainActivity.this, recycler, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(final View view) {
-                AlertDialog.Builder dialogue = new AlertDialog.Builder(MainActivity.this);
-                dialogue.setTitle("Delete entry");
-                dialogue.setMessage("Are you sure you want to delete this entry?");
 
-                dialogue.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                });
-
-                dialogue.setNegativeButton(android.R.string.no, null);
-                dialogue.setIcon(android.R.drawable.ic_dialog_alert);
-                dialogue.show();
             }
 
             @Override

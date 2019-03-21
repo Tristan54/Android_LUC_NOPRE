@@ -1,5 +1,7 @@
 package fr.luc_nopre.projet;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -127,6 +129,27 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
                     }
 
                     TodoDbHelper.updateDone(todo, v.getContext());
+                }
+            });
+
+            l.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+
+                    AlertDialog.Builder dialogue = new AlertDialog.Builder(v.getContext());
+                    dialogue.setTitle("Delete entry");
+                    dialogue.setMessage("Are you sure you want to delete this entry?");
+
+                    dialogue.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            TodoDbHelper.deleteItem(todo, v.getContext());
+                        }
+                    });
+
+                    dialogue.setNegativeButton(android.R.string.no, null);
+                    dialogue.setIcon(android.R.drawable.ic_dialog_alert);
+                    dialogue.show();
+
                 }
             });
 
