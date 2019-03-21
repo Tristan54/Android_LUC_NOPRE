@@ -1,5 +1,6 @@
 package fr.luc_nopre.projet;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.Resources;
@@ -73,6 +74,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
 
         private LinearLayout l;
 
+        @SuppressLint("NewApi")
         public TodoHolder(View itemView) {
             super(itemView);
 
@@ -145,9 +147,30 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
 
 
                     popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        public boolean onMenuItemClick(MenuItem item) {
+                        public boolean onMenuItemClick(final MenuItem item) {
+
+                            if (item.getTitle().equals("Supprimer")) {
+
+                                AlertDialog.Builder dialogue = new AlertDialog.Builder(v.getContext());
+                                dialogue.setTitle("Delete entry");
+                                dialogue.setMessage("Are you sure you want to delete this entry?");
+
+                                dialogue.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        TodoDbHelper.deleteItem(todo, v.getContext());
+
+                                    }
+                                });
+
+                                dialogue.setNegativeButton(android.R.string.no, null);
+                                dialogue.setIcon(android.R.drawable.ic_dialog_alert);
+                                dialogue.show();
+                            } else {
+
+                            }
 
                             return true;
+
                         }
                     });
 
