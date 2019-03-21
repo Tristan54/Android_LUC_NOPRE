@@ -158,8 +158,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
 
 
             LocalDateTime dateActuel = LocalDateTime.now();
-            if(d.isEqual(dateActuel) || d.isBefore(dateActuel)){
+            if(d.isEqual(dateActuel) || d.isBefore(dateActuel) && todo.isDone()){
                 TodoDbHelper.deleteItem(todo,itemView.getContext());
+            }else if(d.isEqual(dateActuel) || d.isBefore(dateActuel)){
+                l.setBackgroundColor(resources.getColor(R.color.red));
             }
 
         }

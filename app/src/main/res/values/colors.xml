@@ -8,4 +8,5 @@
     <color name="important">@android:color/holo_red_dark</color>
     <color name="gray">@android:color/darker_gray</color>
     <color name="white">@android:color/white</color>
+    <color name="red">@android:color/holo_red_light</color>
 </resources>

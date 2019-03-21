@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         setRecyclerViewItemTouchListener();
         Log.i("INIT", "Fin initialisation recycler");
     }
-
+    
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
