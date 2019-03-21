@@ -42,7 +42,12 @@ public class CreationListe extends AppCompatActivity {
 
         LocalDateTime dateCour = LocalDateTime.now();
         dateD.setText(dateCour.getDayOfMonth()+"/"+dateCour.getMonthValue()+"/"+dateCour.getYear());
-        heureD.setText(dateCour.getHour()+":"+dateCour.getMinute());
+        if(dateCour.getMinute() < 10 ){
+            heureD.setText(dateCour.getHour()+":0"+dateCour.getMinute());
+        }else{
+            heureD.setText(dateCour.getHour()+":"+dateCour.getMinute());
+        }
+
 
         Button valider = findViewById(R.id.valider);
         valider.setOnClickListener(new View.OnClickListener() {

@@ -1,11 +1,9 @@
 package fr.luc_nopre.projet;
 
-import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
