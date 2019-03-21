@@ -7,12 +7,15 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -136,19 +139,19 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
                 @Override
                 public void onClick(final View v) {
 
-                    AlertDialog.Builder dialogue = new AlertDialog.Builder(v.getContext());
-                    dialogue.setTitle("Delete entry");
-                    dialogue.setMessage("Are you sure you want to delete this entry?");
 
-                    dialogue.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            TodoDbHelper.deleteItem(todo, v.getContext());
+                    PopupMenu popup = new PopupMenu(v.getContext(), v);
+                    popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+
+
+                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        public boolean onMenuItemClick(MenuItem item) {
+
+                            return true;
                         }
                     });
 
-                    dialogue.setNegativeButton(android.R.string.no, null);
-                    dialogue.setIcon(android.R.drawable.ic_dialog_alert);
-                    dialogue.show();
+                    popup.show();//showing popup menu
 
                 }
             });
