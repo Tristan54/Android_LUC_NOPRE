@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.set(Calendar.HOUR_OF_DAY, 11);
-        calendar.set(Calendar.MINUTE, 37);
+        calendar.set(Calendar.MINUTE, 8);
         /*
         Alarm will be triggered once exactly at 5:30
         */
