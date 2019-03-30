@@ -16,7 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -137,6 +136,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
                 }
             });
 
+            /**
             l.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
@@ -159,10 +159,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
                                     public void onClick(DialogInterface dialog, int which) {
                                         TodoDbHelper.deleteItem(todo, v.getContext());
 
-                                    }
-                                });
 
-                                dialogue.setNegativeButton(android.R.string.no, null);
+                                        MainActivity.notifierSupprimer(todo);
+                                    }
+                                }).setNegativeButton(android.R.string.no, null);
+
                                 dialogue.setIcon(android.R.drawable.ic_dialog_alert);
                                 dialogue.show();
                             } else {
@@ -178,6 +179,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
 
                 }
             });
+             */
 
 
             LocalDateTime dateActuel = LocalDateTime.now();

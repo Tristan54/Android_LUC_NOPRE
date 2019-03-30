@@ -1,19 +1,14 @@
 package fr.luc_nopre.projet;
 
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.icu.util.Calendar;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupMenu;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,14 +29,14 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 
 
-    private static int NOTIFICATION_ID = 2;
-    private static final String CHANNEL_ID = "";
+    private static int NOTIFICATION_ID = 1;
+    private static final String CHANNEL_ID = "chanel 1";
     private ArrayList<TodoItem> items;
     private RecyclerView recycler;
     private LinearLayoutManager manager;
     private RecyclerAdapter adapter;
 
-    public static final int REQUEST_CODE=101;
+    public static final int REQUEST_CODE = 101;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -50,24 +46,8 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Intent intent=new Intent(this,Receiver.class);
-        PendingIntent.getBroadcast(this,REQUEST_CODE,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Calendar calendar = Calendar.getInstance();
-
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 11);
-        calendar.set(Calendar.MINUTE, 8);
-        /*
-        Alarm will be triggered once exactly at 5:30
-        */
-        alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+        createNotificationChannel();
+        startService(new Intent(this, NotificationService.class));
 
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -77,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Intent newAct = new Intent(getBaseContext(), CreationListe.class);
                 startActivity(newAct);
+                recycler.getAdapter().notifyDataSetChanged();
             }
         });
         Log.i("INIT", "Fin initialisation composantes");
@@ -111,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         setRecyclerViewItemTouchListener();
         Log.i("INIT", "Fin initialisation recycler");
     }
-    
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -129,28 +110,31 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Intent dbmanager = new Intent(getBaseContext(),AndroidDatabaseManager.class);
+            Intent dbmanager = new Intent(getBaseContext(), AndroidDatabaseManager.class);
             startActivity(dbmanager);
         }
 
         if (id == R.id.action_clear) {
-            TodoDbHelper.clearBDD(this.getBaseContext());
-            items.clear();
-            recycler.getAdapter().notifyDataSetChanged();
-
+            dataChanged();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    public void dataChanged() {
+        TodoDbHelper.clearBDD(getBaseContext());
+        items.clear();
+        recycler.getAdapter().notifyDataSetChanged();
+    }
+
     private void setRecyclerViewItemTouchListener() {
-        ItemTouchHelper.SimpleCallback itemTouchCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT ) {
+        ItemTouchHelper.SimpleCallback itemTouchCallback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
 
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
                 adapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
-                changerPosition(viewHolder.getAdapterPosition(),target.getAdapterPosition());
+                changerPosition(viewHolder.getAdapterPosition(), target.getAdapterPosition());
                 return true;
             }
 
@@ -165,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 int position = viewHolder.getAdapterPosition();
                 TodoItem item = items.get(position);
-                switch(swipeDir) {
+                switch (swipeDir) {
                     case ItemTouchHelper.RIGHT:
                         item.setDone(true);
                         break;
@@ -181,12 +165,47 @@ public class MainActivity extends AppCompatActivity {
         recycler.addOnItemTouchListener(new RecyclerTouchListener(MainActivity.this, recycler, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(final View view) {
+                int position = recycler.getChildAdapterPosition(view);
+                final TodoItem todo = items.get(position);
+
+                PopupMenu popup = new PopupMenu(view.getContext(), view);
+                popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
+
+
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(final MenuItem item) {
+
+                        if (item.getTitle().equals("Supprimer")) {
+
+                            AlertDialog.Builder dialogue = new AlertDialog.Builder(view.getContext());
+                            dialogue.setTitle("Delete entry");
+                            dialogue.setMessage("Are you sure you want to delete this entry?");
+
+                            dialogue.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    TodoDbHelper.deleteItem(todo, view.getContext());
+                                    items.remove(todo);
+                                    recycler.getAdapter().notifyItemRemoved(( todo).getId());
+                                }
+                            }).setNegativeButton(android.R.string.no, null);
+
+                            dialogue.setIcon(android.R.drawable.ic_dialog_alert);
+                            dialogue.show();
+                        } else {
+
+                        }
+
+                        return true;
+
+                    }
+                });
+
+                popup.show();//showing popup menu
 
             }
 
             @Override
-            public void onLongClick(View view) {
-
+            public void onLongClick(final View view) {
 
             }
         }));
@@ -207,46 +226,20 @@ public class MainActivity extends AppCompatActivity {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             Objects.requireNonNull(notificationManager).createNotificationChannel(channel);
         }
-        NOTIFICATION_ID++;
-    }
-
-    public void showNotification(View view) {
-        createNotificationChannel();
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-
-
-        NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher_icon_foreground)
-                .setContentTitle("Titre")
-                .setContentText("Contenu")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
-
-        // notificationId est un identificateur unique par notification qu'il vous faut définir
-        notificationManager.notify(NOTIFICATION_ID, notifBuilder.build());
     }
 
 
-
-
-    private void changerPosition(int n1, int n2){
+    private void changerPosition(int n1, int n2) {
         // avant changement
         TodoItem item1 = this.items.get(n1);
         TodoItem item2 = this.items.get(n2);
 
         int tmp = item1.getPosition();
         item1.setPosition(item2.getPosition());
-        TodoDbHelper.updatePosition(item1,this.getBaseContext());
+        TodoDbHelper.updatePosition(item1, this.getBaseContext());
 
         item2.setPosition(tmp);
-        TodoDbHelper.updatePosition(item2,this.getBaseContext());
+        TodoDbHelper.updatePosition(item2, this.getBaseContext());
     }
-
 
 }

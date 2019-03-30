@@ -1,13 +1,11 @@
 package fr.luc_nopre.projet;
 
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,9 +28,7 @@ public class CreationListe extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Intent newAct = new Intent(getBaseContext(),MainActivity.class);
-                startActivity(newAct);
+                finish();
             }
         });
 
@@ -103,8 +99,12 @@ public class CreationListe extends AppCompatActivity {
 
                 TodoItem item = new TodoItem(t,label,dateEcheance);
                 TodoDbHelper.addItem(item,getBaseContext());
-                Intent newAct = new Intent(getBaseContext(),MainActivity.class);
-                startActivity(newAct);
+
+                /**
+                 Intent newAct = new Intent(getBaseContext(),MainActivity.class);
+                 startActivity(newAct);
+                 **/
+                finish();
             }
         });
     }
