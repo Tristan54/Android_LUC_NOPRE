@@ -1,5 +1,7 @@
 package fr.luc_nopre.projet;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -7,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +19,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 
 import java.util.ArrayList;
@@ -28,17 +30,15 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
-
-    private static int NOTIFICATION_ID = 1;
     private static final String CHANNEL_ID = "chanel 1";
-    private ArrayList<TodoItem> items;
-    private RecyclerView recycler;
+    private static ArrayList<TodoItem> items;
+    private static RecyclerView recycler;
     private LinearLayoutManager manager;
     private RecyclerAdapter adapter;
+    private Intent notifs;
 
-    public static final int REQUEST_CODE = 101;
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
+    @SuppressLint("NewApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,8 +47,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         createNotificationChannel();
-        startService(new Intent(this, NotificationService.class));
-
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -56,24 +54,16 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 Intent newAct = new Intent(getBaseContext(), CreationListe.class);
-                startActivity(newAct);
-                recycler.getAdapter().notifyDataSetChanged();
+                startActivityForResult(newAct,0);
             }
         });
         Log.i("INIT", "Fin initialisation composantes");
-
-        // Test d'ajout d'un item
-//        TodoItem item = new TodoItem(TodoItem.Tags.Important, "Réviser ses cours");
-//        TodoDbHelper.addItem(item, getBaseContext());
-//        item = new TodoItem(TodoItem.Tags.Normal, "Acheter du pain");
-//        TodoDbHelper.addItem(item, getBaseContext());
 
         // On récupère les items
         items = TodoDbHelper.getItems(this);
         Log.i("INIT", "Fin initialisation items");
 
         // On trie la liste pour avoir dans l'ordre en fonction de leur position
-
         Collections.sort(items, new Comparator<TodoItem>() {
             @Override
             public int compare(TodoItem ti1, TodoItem ti2) {
@@ -88,6 +78,10 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new RecyclerAdapter(items);
         recycler.setAdapter(adapter);
+
+        notifs = new Intent(getBaseContext(), NotificationService.class);
+        notifs.putExtra("items",items);
+        startService(notifs);
 
         setRecyclerViewItemTouchListener();
         Log.i("INIT", "Fin initialisation recycler");
@@ -119,6 +113,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    @Override
+    public void onActivityResult(int requestCode, int returnCode, Intent data) {
+        items.clear();
+        items.addAll(TodoDbHelper.getItems(getBaseContext()));
+        Collections.sort(items, new Comparator<TodoItem>() {
+            @Override
+            public int compare(TodoItem ti1, TodoItem ti2) {
+                return ti1.compareTo(ti2);
+            }
+        });
+        adapter.notifyDataSetChanged();
+
     }
 
     public void dataChanged() {
@@ -157,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
                         item.setDone(false);
                         break;
                 }
+                TodoDbHelper.updateDone(item,getBaseContext());
                 recycler.getAdapter().notifyItemChanged(position);
             }
         };
@@ -168,7 +178,9 @@ public class MainActivity extends AppCompatActivity {
                 int position = recycler.getChildAdapterPosition(view);
                 final TodoItem todo = items.get(position);
 
-                PopupMenu popup = new PopupMenu(view.getContext(), view);
+                LinearLayout l = view.findViewById(R.id.linearLayout);
+
+                PopupMenu popup = new PopupMenu(l.getContext(), l);
                 popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
 
 
@@ -178,21 +190,21 @@ public class MainActivity extends AppCompatActivity {
                         if (item.getTitle().equals("Supprimer")) {
 
                             AlertDialog.Builder dialogue = new AlertDialog.Builder(view.getContext());
-                            dialogue.setTitle("Delete entry");
-                            dialogue.setMessage("Are you sure you want to delete this entry?");
+                            dialogue.setTitle("Supression");
+                            dialogue.setMessage("Etes-vous sûr de vouloir supprimer cet élément ?");
 
                             dialogue.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    TodoDbHelper.deleteItem(todo, view.getContext());
-                                    items.remove(todo);
-                                    recycler.getAdapter().notifyItemRemoved(( todo).getId());
+                                    modifierPosition(todo);
                                 }
                             }).setNegativeButton(android.R.string.no, null);
 
                             dialogue.setIcon(android.R.drawable.ic_dialog_alert);
                             dialogue.show();
-                        } else {
-
+                        } else if (item.getTitle().equals("Modifier")){
+                            Intent newAct = new Intent(getBaseContext(), ModifierItem.class);
+                            newAct.putExtra("item",todo);
+                            startActivityForResult(newAct,1);
                         }
 
                         return true;
@@ -200,16 +212,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-                popup.show();//showing popup menu
-
+                popup.show();
             }
 
             @Override
             public void onLongClick(final View view) {
-
             }
         }));
-
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(itemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recycler);
@@ -241,5 +250,24 @@ public class MainActivity extends AppCompatActivity {
         item2.setPosition(tmp);
         TodoDbHelper.updatePosition(item2, this.getBaseContext());
     }
+
+    private void modifierPosition(TodoItem todo){
+        int position = todo.getPosition()-1;
+
+        TodoDbHelper.deleteItem(todo, getBaseContext());
+        items.remove(todo);
+        recycler.getAdapter().notifyItemRemoved(( todo).getId());
+
+        if(position != items.size()){
+            for (TodoItem it: items) {
+                if(it.getPosition() > position){
+                    it.setPosition(it.getPosition()-1);
+                }
+            }
+            TodoDbHelper.updateToutePosition(items,getBaseContext());
+            adapter.notifyDataSetChanged();
+        }
+    }
+
 
 }

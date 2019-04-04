@@ -18,12 +18,13 @@ import java.util.TimerTask;
 
 public class NotificationService extends Service {
 
-    Timer timer;
-    TimerTask timerTask;
-    String TAG = "Timers";
-    int Your_X_SECS = 5;
+    private Timer timer;
+    private TimerTask timerTask;
+    private String TAG = "Timers";
+    private Intent intent;
     private static int NOTIFICATION_ID = 1;
     private static final String CHANNEL_ID = "chanel 1";
+    private ArrayList<TodoItem> items;
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -31,21 +32,14 @@ public class NotificationService extends Service {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e(TAG, "onStartCommand");
         super.onStartCommand(intent, flags, startId);
 
-        // regarde tout le items
-        /**
-        ArrayList<TodoItem> items = TodoDbHelper.getItems(this);
-
-        for (TodoItem i :items) {
-            LocalDateTime date = i.getDate();
-            Log.i("date ezmrjfzmznerfozenr", ""+date);
-        }
+        this.intent = intent;
         startTimer();
-**/
         return START_STICKY;
     }
 
@@ -53,13 +47,12 @@ public class NotificationService extends Service {
     @Override
     public void onCreate() {
         Log.e(TAG, "onCreate");
-
     }
 
     @Override
     public void onDestroy() {
         Log.e(TAG, "onDestroy");
-        stoptimertask();
+        //stoptimertask();
         super.onDestroy();
 
 
@@ -73,8 +66,8 @@ public class NotificationService extends Service {
 
         initializeTimerTask();
 
-        //timer.schedule(timerTask, 5000, Your_X_SECS * 1000); //
-        timer.schedule(timerTask, 5000,20000);
+        timer.schedule(timerTask,5000, 6*60*60*1000); // relance une notification toute les 6 heures
+
     }
 
     public void stoptimertask() {
@@ -84,7 +77,7 @@ public class NotificationService extends Service {
         }
     }
 
-    public void showNotification() {
+    public void showNotification(String titre ,String contenu) {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
         Intent intent = new Intent(this, MainActivity.class);
@@ -95,22 +88,45 @@ public class NotificationService extends Service {
 
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher_icon_foreground)
-                .setContentTitle("Titre")
-                .setContentText("Contenu")
+                .setContentTitle(titre)
+                .setContentText(contenu)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);
 
         notificationManager.notify(NOTIFICATION_ID, notifBuilder.build());
+        //NOTIFICATION_ID++;
+
     }
 
     public void initializeTimerTask() {
 
+
         timerTask = new TimerTask() {
             public void run() {
                 handler.post(new Runnable() {
+                    @RequiresApi(api = Build.VERSION_CODES.O)
                     public void run() {
-                        showNotification();
+
+                        boolean expire =false;
+                        items = (ArrayList<TodoItem>) intent.getSerializableExtra("items");
+                        LocalDateTime dateAc = LocalDateTime.now();
+                        if(items != null || !items.isEmpty()){
+                            for (TodoItem i :items) {
+                                LocalDateTime date = i.getDate();
+                                if(date.isBefore(dateAc)){
+                                    expire = true;
+                                }
+                            }
+
+                            if(expire){
+                                Log.i("notifs","notification pour rapel");
+                                showNotification("Urgent","Un item de votre liste est expirer !");
+                            }else{
+                                showNotification("Liste","Vous pouvez consulter vos activités ici !");
+                            }
+                            expire =false;
+                        }
                     }
                 });
             }

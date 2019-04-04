@@ -1,19 +1,15 @@
 package fr.luc_nopre.projet;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -38,9 +34,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onBindViewHolder(TodoHolder holder, int position) {
-        TodoItem it = items.get(position);
+        final TodoItem it = items.get(position);
         holder.bindTodo(it);
     }
+
 
 
     @Override
@@ -58,13 +55,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
         return true;
     }
 
+    @Override
+    public void onItemDismiss(int position) {
+    }
+
 
     @Override
     public int getItemCount() {
         return items.size();
     }
 
-    public static class TodoHolder extends RecyclerView.ViewHolder {
+    public class TodoHolder extends RecyclerView.ViewHolder {
         private Resources resources;
         private ImageView image;
         private Switch sw;
@@ -90,7 +91,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
 
         @RequiresApi(api = Build.VERSION_CODES.O)
         public void bindTodo(final TodoItem todo) {
-            LocalDateTime d = todo.getDate();
+            final LocalDateTime dateActuel = LocalDateTime.now();
+            final LocalDateTime d = todo.getDate();
             int day = d.getDayOfMonth();
             int month = d.getMonthValue();
             int years = d.getYear();
@@ -103,9 +105,19 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
             sw.setChecked(todo.isDone());
 
             if(todo.isDone()){
-                l.setBackgroundColor(resources.getColor(R.color.gray));
+                if(d.isEqual(dateActuel) || d.isBefore(dateActuel)){
+                    l.setBackgroundColor(resources.getColor(R.color.red));
+                }else{
+                    l.setBackgroundColor(resources.getColor(R.color.gray));
+                }
             }else{
                 l.setBackgroundColor(resources.getColor(R.color.white));
+            }
+
+            if(d.isEqual(dateActuel) || d.isBefore(dateActuel) && todo.isDone()){
+                TodoDbHelper.deleteItem(todo,itemView.getContext());
+            }else if(d.isEqual(dateActuel) || d.isBefore(dateActuel)){
+                l.setBackgroundColor(resources.getColor(R.color.red));
             }
 
 
@@ -124,72 +136,26 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.TodoHo
             sw.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (todo.isDone()) {
-                        todo.setDone(false);
-                        l.setBackgroundColor(resources.getColor(R.color.white));
-                    } else {
-                        todo.setDone(true);
-                        l.setBackgroundColor(resources.getColor(R.color.gray));
-                    }
-
-                    TodoDbHelper.updateDone(todo, v.getContext());
-                }
-            });
-
-            /**
-            l.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(final View v) {
-
-
-                    PopupMenu popup = new PopupMenu(v.getContext(), v);
-                    popup.getMenuInflater().inflate(R.menu.popup_menu, popup.getMenu());
-
-
-                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        public boolean onMenuItemClick(final MenuItem item) {
-
-                            if (item.getTitle().equals("Supprimer")) {
-
-                                AlertDialog.Builder dialogue = new AlertDialog.Builder(v.getContext());
-                                dialogue.setTitle("Delete entry");
-                                dialogue.setMessage("Are you sure you want to delete this entry?");
-
-                                dialogue.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        TodoDbHelper.deleteItem(todo, v.getContext());
-
-
-                                        MainActivity.notifierSupprimer(todo);
-                                    }
-                                }).setNegativeButton(android.R.string.no, null);
-
-                                dialogue.setIcon(android.R.drawable.ic_dialog_alert);
-                                dialogue.show();
-                            } else {
-
-                            }
-
-                            return true;
-
+                    if(d.isEqual(dateActuel) || d.isBefore(dateActuel)){
+                        l.setBackgroundColor(resources.getColor(R.color.red));
+                        if(todo.isDone()){
+                            todo.setDone(false);
+                        }else{
+                            todo.setDone(true);
                         }
-                    });
-
-                    popup.show();//showing popup menu
-
+                        TodoDbHelper.updateDone(todo, v.getContext());
+                    }else{
+                        if (todo.isDone()) {
+                            todo.setDone(false);
+                            l.setBackgroundColor(resources.getColor(R.color.white));
+                        } else {
+                            todo.setDone(true);
+                            l.setBackgroundColor(resources.getColor(R.color.gray));
+                        }
+                        TodoDbHelper.updateDone(todo, v.getContext());
+                    }
                 }
             });
-             */
-
-
-            LocalDateTime dateActuel = LocalDateTime.now();
-            if(d.isEqual(dateActuel) || d.isBefore(dateActuel) && todo.isDone()){
-                TodoDbHelper.deleteItem(todo,itemView.getContext());
-            }else if(d.isEqual(dateActuel) || d.isBefore(dateActuel)){
-                l.setBackgroundColor(resources.getColor(R.color.red));
-            }
-
         }
-
     }
 }

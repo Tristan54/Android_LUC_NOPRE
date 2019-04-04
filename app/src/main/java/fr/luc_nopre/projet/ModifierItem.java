@@ -1,5 +1,7 @@
 package fr.luc_nopre.projet;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -10,18 +12,22 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import java.time.LocalDateTime;
 
+public class ModifierItem extends AppCompatActivity {
 
-public class CreationListe extends AppCompatActivity {
+    private TodoItem todo;
 
+
+    @SuppressLint("ResourceType")
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_creation_liste);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        setContentView(R.layout.activity_modifier_item);
+        final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -32,17 +38,35 @@ public class CreationListe extends AppCompatActivity {
             }
         });
 
+        Intent intent = getIntent();
+        todo = (TodoItem) intent.getSerializableExtra("item");
+
+
         // On initilaise les editText à la date et l'heure actuelle
         EditText dateD = findViewById(R.id.date);
         EditText heureD = findViewById(R.id.heure);
 
-        LocalDateTime dateCour = LocalDateTime.now();
+        LocalDateTime dateCour = todo.getDate();
         dateD.setText(dateCour.getDayOfMonth() + "/" + dateCour.getMonthValue() + "/" + dateCour.getYear());
         if (dateCour.getMinute() < 10) {
             heureD.setText(dateCour.getHour() + ":0" + dateCour.getMinute());
         } else {
             heureD.setText(dateCour.getHour() + ":" + dateCour.getMinute());
         }
+        EditText text = (EditText) findViewById(R.id.textListe);
+        text.setText(todo.getLabel());
+
+        RadioGroup radio = findViewById(R.id.radio);
+        if(todo.getTag() == TodoItem.Tags.Faible){
+            radio.check(R.id.radioButton);
+        }else if(todo.getTag() == TodoItem.Tags.Normal){
+            radio.check(R.id.radioButton2);
+        }else{
+            radio.check(R.id.radioButton3);
+        }
+
+        TextView pos = (TextView) findViewById(R.id.position);
+        pos.setText("Position : "+todo.getPosition());
 
 
         Button valider = findViewById(R.id.valider);
@@ -89,7 +113,6 @@ public class CreationListe extends AppCompatActivity {
                 int month = Integer.parseInt(dateSep[1]);
                 int years = Integer.parseInt(dateSep[2]);
 
-
                 final String SEPARATEURH = ":";
                 String heureSep[] = heure.getText().toString().split(SEPARATEURH);
                 int hours = Integer.parseInt(heureSep[0]);
@@ -97,8 +120,11 @@ public class CreationListe extends AppCompatActivity {
 
                 LocalDateTime dateEcheance = LocalDateTime.of(years, month, day, hours, minutes);
 
-                TodoItem item = new TodoItem(t, label, dateEcheance);
-                TodoDbHelper.addItem(item, getBaseContext());
+                todo.setLabel(label);
+                todo.setTag(t);
+                todo.setDate(dateEcheance);
+
+                TodoDbHelper.updateItem(todo, getBaseContext());
 
                 finish();
             }

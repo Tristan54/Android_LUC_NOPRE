@@ -4,4 +4,6 @@
     <string name="title_activity_creation_liste">creationListe</string>
     <string name="formulaire_de_creation_de_liste">Formulaire de création de liste</string>
     <string name="action_clear">vider la BDD</string>
+    <string name="title_activity_modifier_item">ModifierItem</string>
+    <string name="formulaire_de_modification_d_item">Formulaire de modification d\'item</string>
 </resources>

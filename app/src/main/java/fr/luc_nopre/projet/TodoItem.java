@@ -1,8 +1,9 @@
 package fr.luc_nopre.projet;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class TodoItem {
+public class TodoItem implements Serializable {
 
     public enum Tags {
         Faible("Faible"), Normal("Normal"), Important("Important");
